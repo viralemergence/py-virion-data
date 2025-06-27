@@ -24,7 +24,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "requests",
+  "fs",
+]
 
 [project.urls]
 Documentation = "https://github.com/viralemergence/py-virion-data#readme"

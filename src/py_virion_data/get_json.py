@@ -22,9 +22,9 @@ def get_json( zenodo_url: str):
 
     return out 
  
-parent_json = get_json("https://zenodo.org/api/records/15643003")
+# parent_json = get_json("https://zenodo.org/api/records/15643003")
 
-print(parent_json["id"])
+# print(parent_json["id"])
 
 #versions_json = get_json("https://zenodo.org/api/records/15733485/versions")
 
