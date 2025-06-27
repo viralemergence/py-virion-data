@@ -27,6 +27,7 @@ classifiers = [
 dependencies = [
   "requests",
   "fs",
+  "pandas",
 ]
 
 [project.urls]

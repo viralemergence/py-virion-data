@@ -5,6 +5,7 @@ import get_json
 import sanitize_id
 import fs 
 from fs.osfs import OSFS
+import pandas as pd
 
 class deposit:
     """deposit class object holds deposit attributes
@@ -50,24 +51,40 @@ class deposit:
         self.working_url = ""
       # self.working_json
         self.working_json = dict()
+        # working files consist of key (file name) and url (url to file on zenodo) 
+        self.working_files = dict()
     
 
     def set_working_version(self, zenodo_id: str):
-        """set the working version of the data
+        """set the working version of the data.
+        Downloads and parses the desired zenodo deposit.
+        Sets the the working_version, working_url, working_json,
+        and working_files attributes.
+
 
         Parameters
         ----------
         zenodo_id : str
             zenodo id for the working version of the data.
-
+        
+        Examples
+        --------
         virion = deposit()
-        virion.set_working_version(virion.latest)
+        virion.set_working_version(virion.latest_version)
 
         """
         zenodo_id = sanitize_id.sanitize_id(zenodo_id)
         self.working_version = zenodo_id
         self.working_url = "https://zenodo.org/api/records/%s" % zenodo_id
         self.working_json = get_json.get_json(self.working_url)
+        # add files in a dict
+        dep_files =  self.working_json["files"]
+        file_dict = dict()
+        for item in dep_files:
+            file_key = item["key"]
+            file_url = item["links"]["self"]
+            file_dict[file_key] = file_url
+        self.working_files = file_dict
 
     def download_versioned_data(self, zenodo_id = "working", dir = "outputs", recreate = True):
         
@@ -82,33 +99,29 @@ class deposit:
         
         # create directory with version
         home_fs = OSFS(".")
-        home_fs.makedir(dir)    
+        ## wrap in a try? or check if it exsists first?
+        home_fs.makedir(dir, recreate = recreate)    
         download_dir = fs.path.join(dir,zenodo_id)
         home_fs.makedir(download_dir, recreate = recreate)
         # download the files
-        dep_files =  self.working_json["files"]
-        for item in dep_files:
-            file_key = item["key"]
-            file_url = item["links"]["self"]
+        
+        for file_key, file_url in self.working_files.items():
             file_path = fs.path.join(download_dir,file_key)
             r = requests.get(file_url)
             open(file_path, 'wb').write(r.content)
 
         # return the file path
         return download_dir
-
-        
-
     
-    def load_remote_gzipped_csv(url, encodings=['utf-8', 'windows-1252']):
-        response = requests.get(url)
-        response.raise_for_status()
-        for encoding in encodings:
-            try:
-                return pd.read_csv(BytesIO(response.content), compression='gzip', encoding=encoding)
-            except UnicodeDecodeError:
-                continue
-        raise UnicodeDecodeError(f"Failed to decode {url} with encodings: {encodings}")
+    # def load_remote_gzipped_csv(url, encodings=['utf-8', 'windows-1252']):
+    #     response = requests.get(url)
+    #     response.raise_for_status()
+    #     for encoding in encodings:
+    #         try:
+    #             return pd.read_csv(BytesIO(response.content), compression='gzip', encoding=encoding)
+    #         except UnicodeDecodeError:
+    #             continue
+    #     raise UnicodeDecodeError(f"Failed to decode {url} with encodings: {encodings}")
 
 
 # home_fs = OSFS(".")
@@ -117,9 +130,12 @@ class deposit:
 
 # print(home_fs.listdir(path = "/"))
 
-zenodo_dep = deposit()
-zenodo_dep.set_working_version(zenodo_dep.latest_version)   
-zenodo_dep.download_versioned_data()
+# zenodo_dep = deposit()
+# zenodo_dep.set_working_version(zenodo_dep.latest_version)
+# # print(zenodo_dep.working_files)   
+# # zenodo_dep.download_versioned_data()
+# lates_virion  = zenodo_dep.load_remote_gzipped_csv("https://zenodo.org/api/records/15733485/files/virion.csv.gz/content")
+# print(len(lates_virion))
 
 #print(versions_json["hits"]["hits"][1].keys())
 
