@@ -94,25 +94,64 @@ class deposit:
 
 
     def download_versioned_data(self, zenodo_id = "working", dir = "outputs", recreate = True):
+        """Save a particular version of the deposit to disc. 
+
+        Parameters
+        ----------
+        zenodo_id : str, optional
+            Zenodo id for a particular version of the data, by default "working" but also accepts "latest".  
+        dir : str, optional
+            directory where you would like to save the data, by default "outputs"
+        recreate : bool, optional
+            Should the downloaded files be recreated (overwritten), by default True
+
+        Returns
+        -------
+        str
+            path to directory with files. Data are stored in `dir/zenodo_id` to preserve the data version.
+        """
         
         if zenodo_id == "working":
             zenodo_id = self.working_version
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty
         if zenodo_id == "latest":
             ### inform user that the working version is changing?
             zenodo_id = self.latest_version
-            self.set_working_version(zenodo_id=zenodo_id)
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty - should be impossible
-        
+            # self.set_working_version(zenodo_id=zenodo_id)
+        if zenodo_id not in ["latest","working"]:
+            zenodo_id = sanitize_id.sanitize_id(zenodo_id)
+            # self.set_working_version(zenodo_id=zenodo_id)
+
+        # setup zenodo items
+
+        dep_url = "https://zenodo.org/api/records/%s" % zenodo_id
+        dep_json = get_json.get_json(dep_url)
+        # add files in a dict
+        dep_files =  dep_json["files"]
+        file_dict = dict()
+        for item in dep_files:
+            file_key = item["key"]
+            file_url = item["links"]["self"]
+            file_dict[file_key] = file_url
+        dep_files = file_dict 
+
         # create directory with version
         home_fs = OSFS(".")
-        ## wrap in a try? or check if it exsists first?
-        home_fs.makedir(dir, recreate = recreate)    
+
         download_dir = fs.path.join(dir,zenodo_id)
+        
+        # if the whole thing is there, and we don't want to re-download, return the directory
+        if home_fs.exists(download_dir) & (not recreate):
+            return download_dir
+
+        # if dir is not there, make it 
+        if not home_fs.exists(dir): 
+            home_fs.makedir(dir, recreate = recreate)
+
         home_fs.makedir(download_dir, recreate = recreate)
+
         # download the files
         
-        for file_key, file_url in self.working_files.items():
+        for file_key, file_url in dep_files.items():
             file_path = fs.path.join(download_dir,file_key)
             r = requests.get(file_url)
             open(file_path, 'wb').write(r.content)
@@ -251,9 +290,25 @@ class deposit:
         Parameters
         ----------
         style : str
-            _description_
+            A citation style. Must be one of: 
+              "havard-cite-them-right",
+               "apa",
+               "modern-language-association",
+               "vancouver",
+               "chicago-fullnote-bibliography",
+               "ieee"
         zenodo_id : str, optional
-            _description_, by default "working":str
+            _description_, by default "working" also accepts "latest". Does not change working version!
+
+        Returns
+        -------
+        str
+            Citation in appropriate style
+
+        Raises
+        ------
+        ValueError
+            style must be one of the supported style types
         """
 
         styles =  ["havard-cite-them-right",
@@ -291,10 +346,11 @@ class deposit:
 
 # print(home_fs.listdir(path = "/"))
 
-# zenodo_dep = deposit()
-# zenodo_dep.set_working_version(zenodo_dep.latest_version)
-# # print(zenodo_dep.working_files)   
-# # zenodo_dep.download_versioned_data()
+zenodo_dep = deposit()
+zenodo_dep.set_working_version(zenodo_dep.latest_version)
+# print(zenodo_dep.working_files)   
+zenodo_dep.download_versioned_data(recreate=False)
+zenodo_dep.download_versioned_data(zenodo_id=15677843)
 # lates_virion  = zenodo_dep.load_remote_gzipped_csv("https://zenodo.org/api/records/15733485/files/virion.csv.gz/content")
 # print(len(lates_virion))
 
