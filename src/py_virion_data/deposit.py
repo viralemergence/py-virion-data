@@ -86,6 +86,12 @@ class deposit:
             file_url = item["links"]["self"]
             file_dict[file_key] = file_url
         self.working_files = file_dict
+        # add attribution information
+        # bibtex
+        self.working_bibtex = self.export_metadata(format="bibtex")
+        # citation
+        self.working_citation = self.get_citation(style = "apa")
+
 
     def download_versioned_data(self, zenodo_id = "working", dir = "outputs", recreate = True):
         
@@ -194,6 +200,89 @@ class deposit:
             return self.load_remote_csv_file(file_key=matched_key, encodings=encodings, compressed=True)
         else:
             return self.load_remote_csv_file(file_key=matched_key, encodings=encodings, compressed=False)
+    
+    def export_metadata(self, format: str, zenodo_id = "working"):
+        """Export metadata for a version of the deposit.
+
+        Parameters
+        ----------
+        format : str
+            file format for the metadata. One of "json", "json-ld","csl","datacite-json","datacite-xml", "dublincore","marcxml","bibtex","geojson","dcat-ap","codemeta", "cff"
+        zenodo_id : str, optional
+            Zenodo id for the version of the data, by default "working". Also accepts "latest". Does not change working version!
+
+        Returns
+        -------
+        str
+            File contents as a text string.
+
+        Raises
+        ------
+        ValueError
+            Checks if format is one of the supported file types.
+        
+        Examples
+        --------
+        virion = deposit()
+        virion.export_metadata(format = "json-ld", zenodo_id = "latest")
+        """
+        formats = ["json", "json-ld","csl","datacite-json","datacite-xml", "dublincore","marcxml","bibtex","geojson","dcat-ap","codemeta", "cff"]
+        
+        if format not in formats:
+                raise ValueError(
+                    f"format - '{format}' - must be one of '{formats}'"
+                    )
+        
+        if zenodo_id == "working":
+            zenodo_id = self.working_version
+            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty
+        if zenodo_id == "latest":
+            zenodo_id = self.latest_version
+            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty - should be impossible
+    
+        export_url = f"https://zenodo.org/records/{zenodo_id}/export/{format}"
+        resp = requests.get(export_url)
+        return resp.text
+
+
+    def get_citation(self, style: str, zenodo_id = "working"):
+        """_summary_
+
+        Parameters
+        ----------
+        style : str
+            _description_
+        zenodo_id : str, optional
+            _description_, by default "working":str
+        """
+
+        styles =  ["havard-cite-them-right",
+               "apa",
+               "modern-language-association",
+               "vancouver",
+               "chicago-fullnote-bibliography",
+               "ieee"]
+
+        if style not in styles:
+            raise ValueError(
+                    f"style - '{style}' - must be one of '{styles}'"
+                    )
+        
+        if zenodo_id == "working":
+            zenodo_id = self.working_version
+            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty
+        if zenodo_id == "latest":
+            zenodo_id = self.latest_version
+            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty - should be impossible
+    
+
+        citation_url = f"https://zenodo.org/api/records/{zenodo_id}?locale=en-US&style={style}"
+
+        headers = {'Accept': 'text/x-bibliography',
+                   'Content-type': 'text/x-bibliography'}
+        resp = requests.get(url = citation_url, headers = headers)
+        return resp.content
+        
 
 
 # home_fs = OSFS(".")
@@ -211,3 +300,9 @@ class deposit:
 
 #print(versions_json["hits"]["hits"][1].keys())
 
+# virion = deposit()
+# json_ld = virion.export_metadata(format = "json-ld", zenodo_id = "latest")
+# print(json_ld)
+
+# virion.set_working_version(zenodo_id="15733485")
+# print(virion.working_citation)
