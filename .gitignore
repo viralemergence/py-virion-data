@@ -194,3 +194,5 @@ cython_debug/
 .cursorindexingignore
 
 outputs
+.DS_Store
+*/DS_Store
