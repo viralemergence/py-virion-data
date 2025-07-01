@@ -111,12 +111,7 @@ class deposit:
             path to directory with files. Data are stored in `dir/zenodo_id` to preserve the data version.
         """
         
-        if zenodo_id == "working":
-            zenodo_id = self.working_version
-        if zenodo_id == "latest":
-            zenodo_id = self.latest_version
-        if zenodo_id not in ["latest","working"]:
-            zenodo_id = sanitize_id.sanitize_id(zenodo_id)
+        zenodo_id = self.check_zenodo_id(zenodo_id)
 
         # setup zenodo items
 
@@ -269,12 +264,7 @@ class deposit:
                     f"format - '{format}' - must be one of '{formats}'"
                     )
         
-        if zenodo_id == "working":
-            zenodo_id = self.working_version
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty
-        if zenodo_id == "latest":
-            zenodo_id = self.latest_version
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty - should be impossible
+        zenodo_id = self.check_zenodo_id(zenodo_id)
     
         export_url = f"https://zenodo.org/records/{zenodo_id}/export/{format}"
         resp = requests.get(export_url)
@@ -320,20 +310,35 @@ class deposit:
                     f"style - '{style}' - must be one of '{styles}'"
                     )
         
-        if zenodo_id == "working":
-            zenodo_id = self.working_version
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty
-        if zenodo_id == "latest":
-            zenodo_id = self.latest_version
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty - should be impossible
+        zenodo_id = self.check_zenodo_id(zenodo_id)
     
-
         citation_url = f"https://zenodo.org/api/records/{zenodo_id}?locale=en-US&style={style}"
 
         headers = {'Accept': 'text/x-bibliography',
                    'Content-type': 'text/x-bibliography'}
         resp = requests.get(url = citation_url, headers = headers)
         return resp.content
+    
+    def check_zenodo_id(self, zenodo_id:str):
+        """_summary_
+
+        Parameters
+        ----------
+        zenodo_id : str
+            Zenodo id for a version of the data. Can also be "working" or "latest" to the get the working or latest version respectively.
+
+        Returns
+        -------
+        str
+            sanitized zenodo id.
+        """
+        if zenodo_id == "working":
+            zenodo_id = self.working_version
+        if zenodo_id == "latest":
+            zenodo_id = self.latest_version
+        if zenodo_id not in ["latest","working"]:
+            zenodo_id = sanitize_id.sanitize_id(zenodo_id)
+        return zenodo_id
         
 
 
