@@ -5,13 +5,16 @@ build-backend = "hatchling.build"
 [project]
 name = "py-virion-data"
 dynamic = ["version"]
-description = ''
+description = 'Consistent and ergonomic methods for accessing versioned Virion data'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [
   { name = "collinschwantes", email = "collin@viralemergence.org" },
+  {email = "collin.schwantes@yale.edu"},
+  { name = "ricardorivero", email = "rrh9619@gmail.com"},
+  { email = "ricardo.rivero@wsu.edu"},
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
