@@ -114,12 +114,9 @@ class deposit:
         if zenodo_id == "working":
             zenodo_id = self.working_version
         if zenodo_id == "latest":
-            ### inform user that the working version is changing?
             zenodo_id = self.latest_version
-            # self.set_working_version(zenodo_id=zenodo_id)
         if zenodo_id not in ["latest","working"]:
             zenodo_id = sanitize_id.sanitize_id(zenodo_id)
-            # self.set_working_version(zenodo_id=zenodo_id)
 
         # setup zenodo items
 
@@ -346,11 +343,11 @@ class deposit:
 
 # print(home_fs.listdir(path = "/"))
 
-zenodo_dep = deposit()
-zenodo_dep.set_working_version(zenodo_dep.latest_version)
-# print(zenodo_dep.working_files)   
-zenodo_dep.download_versioned_data(recreate=False)
-zenodo_dep.download_versioned_data(zenodo_id=15677843)
+# zenodo_dep = deposit()
+# zenodo_dep.set_working_version(zenodo_dep.latest_version)
+# # print(zenodo_dep.working_files)   
+# zenodo_dep.download_versioned_data(recreate=False)
+# zenodo_dep.download_versioned_data(zenodo_id=15677843)
 # lates_virion  = zenodo_dep.load_remote_gzipped_csv("https://zenodo.org/api/records/15733485/files/virion.csv.gz/content")
 # print(len(lates_virion))
 
