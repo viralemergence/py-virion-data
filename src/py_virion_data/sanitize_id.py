@@ -30,4 +30,4 @@ def sanitize_id(zenodo_id):
     if verify_int:
         return zenodo_id_nows
         
-    raise ValueError("zenodo id must only contain digits")
+    raise ValueError(f"zenodo id - '{zenodo_id}' - must only contain digits")

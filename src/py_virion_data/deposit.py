@@ -86,27 +86,64 @@ class deposit:
             file_url = item["links"]["self"]
             file_dict[file_key] = file_url
         self.working_files = file_dict
+        # add attribution information
+        # bibtex
+        self.working_bibtex = self.export_metadata(format="bibtex")
+        # citation
+        self.working_citation = self.get_citation(style = "apa")
+
 
     def download_versioned_data(self, zenodo_id = "working", dir = "outputs", recreate = True):
+        """Save a particular version of the deposit to disc. 
+
+        Parameters
+        ----------
+        zenodo_id : str, optional
+            Zenodo id for a particular version of the data, by default "working" but also accepts "latest".  
+        dir : str, optional
+            directory where you would like to save the data, by default "outputs"
+        recreate : bool, optional
+            Should the downloaded files be recreated (overwritten), by default True
+
+        Returns
+        -------
+        str
+            path to directory with files. Data are stored in `dir/zenodo_id` to preserve the data version.
+        """
         
-        if zenodo_id == "working":
-            zenodo_id = self.working_version
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty
-        if zenodo_id == "latest":
-            ### inform user that the working version is changing?
-            zenodo_id = self.latest_version
-            self.set_working_version(zenodo_id=zenodo_id)
-            sanitize_id.sanitize_id(zenodo_id) # will throw an error if is empty - should be impossible
-        
+        zenodo_id = self.check_zenodo_id(zenodo_id)
+
+        # setup zenodo items
+
+        dep_url = "https://zenodo.org/api/records/%s" % zenodo_id
+        dep_json = get_json.get_json(dep_url)
+        # add files in a dict
+        dep_files =  dep_json["files"]
+        file_dict = dict()
+        for item in dep_files:
+            file_key = item["key"]
+            file_url = item["links"]["self"]
+            file_dict[file_key] = file_url
+        dep_files = file_dict 
+
         # create directory with version
         home_fs = OSFS(".")
-        ## wrap in a try? or check if it exsists first?
-        home_fs.makedir(dir, recreate = recreate)    
+
         download_dir = fs.path.join(dir,zenodo_id)
+        
+        # if the whole thing is there, and we don't want to re-download, return the directory
+        if home_fs.exists(download_dir) & (not recreate):
+            return download_dir
+
+        # if dir is not there, make it 
+        if not home_fs.exists(dir): 
+            home_fs.makedir(dir, recreate = recreate)
+
         home_fs.makedir(download_dir, recreate = recreate)
+
         # download the files
         
-        for file_key, file_url in self.working_files.items():
+        for file_key, file_url in dep_files.items():
             file_path = fs.path.join(download_dir,file_key)
             r = requests.get(file_url)
             open(file_path, 'wb').write(r.content)
@@ -194,6 +231,115 @@ class deposit:
             return self.load_remote_csv_file(file_key=matched_key, encodings=encodings, compressed=True)
         else:
             return self.load_remote_csv_file(file_key=matched_key, encodings=encodings, compressed=False)
+    
+    def export_metadata(self, format: str, zenodo_id = "working"):
+        """Export metadata for a version of the deposit.
+
+        Parameters
+        ----------
+        format : str
+            file format for the metadata. One of "json", "json-ld","csl","datacite-json","datacite-xml", "dublincore","marcxml","bibtex","geojson","dcat-ap","codemeta", "cff"
+        zenodo_id : str, optional
+            Zenodo id for the version of the data, by default "working". Also accepts "latest". Does not change working version!
+
+        Returns
+        -------
+        str
+            File contents as a text string.
+
+        Raises
+        ------
+        ValueError
+            Checks if format is one of the supported file types.
+        
+        Examples
+        --------
+        virion = deposit()
+        virion.export_metadata(format = "json-ld", zenodo_id = "latest")
+        """
+        formats = ["json", "json-ld","csl","datacite-json","datacite-xml", "dublincore","marcxml","bibtex","geojson","dcat-ap","codemeta", "cff"]
+        
+        if format not in formats:
+                raise ValueError(
+                    f"format - '{format}' - must be one of '{formats}'"
+                    )
+        
+        zenodo_id = self.check_zenodo_id(zenodo_id)
+    
+        export_url = f"https://zenodo.org/records/{zenodo_id}/export/{format}"
+        resp = requests.get(export_url)
+        return resp.text
+
+
+    def get_citation(self, style: str, zenodo_id = "working"):
+        """_summary_
+
+        Parameters
+        ----------
+        style : str
+            A citation style. Must be one of: 
+              "havard-cite-them-right",
+               "apa",
+               "modern-language-association",
+               "vancouver",
+               "chicago-fullnote-bibliography",
+               "ieee"
+        zenodo_id : str, optional
+            _description_, by default "working" also accepts "latest". Does not change working version!
+
+        Returns
+        -------
+        str
+            Citation in appropriate style
+
+        Raises
+        ------
+        ValueError
+            style must be one of the supported style types
+        """
+
+        styles =  ["havard-cite-them-right",
+               "apa",
+               "modern-language-association",
+               "vancouver",
+               "chicago-fullnote-bibliography",
+               "ieee"]
+
+        if style not in styles:
+            raise ValueError(
+                    f"style - '{style}' - must be one of '{styles}'"
+                    )
+        
+        zenodo_id = self.check_zenodo_id(zenodo_id)
+    
+        citation_url = f"https://zenodo.org/api/records/{zenodo_id}?locale=en-US&style={style}"
+
+        headers = {'Accept': 'text/x-bibliography',
+                   'Content-type': 'text/x-bibliography'}
+        resp = requests.get(url = citation_url, headers = headers)
+        return resp.content
+    
+    def check_zenodo_id(self, zenodo_id:str):
+        """Checks if Zenodo ID conforms to a pattern. Also allows a user to pass lastest or working as valid zenodo ids.
+
+        Parameters
+        ----------
+        zenodo_id : str
+            Zenodo id for a version of the data. Can also be "working" or "latest" to the get the working or latest version respectively.
+
+        Returns
+        -------
+        str
+            sanitized zenodo id.
+        """
+        if zenodo_id == "working":
+            zenodo_id = self.working_version
+        if zenodo_id == "latest":
+            zenodo_id = self.latest_version
+        if zenodo_id not in ["latest","working"]:
+            zenodo_id = sanitize_id.sanitize_id(zenodo_id)
+        return zenodo_id
+        
 
 
 # home_fs = OSFS(".")
@@ -205,9 +351,16 @@ class deposit:
 # zenodo_dep = deposit()
 # zenodo_dep.set_working_version(zenodo_dep.latest_version)
 # # print(zenodo_dep.working_files)   
-# # zenodo_dep.download_versioned_data()
+# zenodo_dep.download_versioned_data(recreate=False)
+# zenodo_dep.download_versioned_data(zenodo_id=15677843)
 # lates_virion  = zenodo_dep.load_remote_gzipped_csv("https://zenodo.org/api/records/15733485/files/virion.csv.gz/content")
 # print(len(lates_virion))
 
 #print(versions_json["hits"]["hits"][1].keys())
 
+# virion = deposit()
+# json_ld = virion.export_metadata(format = "json-ld", zenodo_id = "latest")
+# print(json_ld)
+
+# virion.set_working_version(zenodo_id="15733485")
+# print(virion.working_citation)
