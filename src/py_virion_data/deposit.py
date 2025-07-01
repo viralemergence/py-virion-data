@@ -320,7 +320,7 @@ class deposit:
         return resp.content
     
     def check_zenodo_id(self, zenodo_id:str):
-        """_summary_
+        """Checks if Zenodo ID conforms to a pattern. Also allows a user to pass lastest or working as valid zenodo ids.
 
         Parameters
         ----------
