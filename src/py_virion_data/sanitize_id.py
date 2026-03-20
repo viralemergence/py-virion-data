@@ -1,7 +1,7 @@
 import re
 
 def sanitize_id(zenodo_id):
-    """Check that the zenodo is interger like and do some light cleaning.
+    """Check that the zenodo is integer like and do some light cleaning.
 
     Parameters
     ----------
