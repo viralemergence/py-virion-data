@@ -1,20 +1,18 @@
 import requests
 import json
 
-def get_json( zenodo_url: str):
-    """_summary_
+def get_json(zenodo_url: str):
+    """Fetch a Zenodo API endpoint and return the parsed JSON response.
 
     Parameters
     ----------
-    zenodo_id : string
-        Zenodo id for a deposit
-    zenodo_url : string
-        Zenodo url pointing to json object
+    zenodo_url : str
+        Zenodo URL pointing to a JSON object.
 
     Returns
     -------
     dict
-        json response
+        Parsed JSON response.
     """
 
     resp = requests.get(zenodo_url)
