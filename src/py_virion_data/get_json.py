@@ -24,7 +24,7 @@ def get_json(zenodo_url: str):
 
 # print(parent_json["id"])
 
-#versions_json = get_json("https://zenodo.org/api/records/15733485/versions")
+# versions_json = get_json("https://zenodo.org/api/records/15733485/versions")
 
 # print(json.dumps(versions_json["hits"],sort_keys=True, indent=4))
-#print(versions_json["hits"]["hits"][1].keys())
+# print(versions_json["hits"]["hits"][1].keys())
