@@ -3,8 +3,9 @@ import json
 import requests
 from py_virion_data import get_json
 from py_virion_data import sanitize_id
-import fs 
-from fs.osfs import OSFS
+import os
+import fsspec 
+from fsspec.implementations.local import LocalFileSystem
 import pandas as pd
 from io import BytesIO
 
@@ -47,7 +48,7 @@ class deposit:
         latest_version = parent_json["id"]
         self.latest_version = sanitize_id.sanitize_id(latest_version)
 
-      # self.working_verion
+      # self.working_version
         self.working_version = ""
         self.working_url = ""
       # self.working_json
@@ -94,7 +95,7 @@ class deposit:
 
 
     def download_versioned_data(self, zenodo_id = "working", dir = "outputs", recreate = True):
-        """Save a particular version of the deposit to disc. 
+        """Save a particular version of the deposit to disk. 
 
         Parameters
         ----------
@@ -127,9 +128,11 @@ class deposit:
         dep_files = file_dict 
 
         # create directory with version
-        home_fs = OSFS(".")
-
-        download_dir = fs.path.join(dir,zenodo_id)
+        ## set fs location to current directory
+        # not sure this will work/is necessary
+        home_fs = LocalFileSystem()
+        ## create downloads location
+        download_dir = os.path.join(dir,zenodo_id)
         
         # if the whole thing is there, and we don't want to re-download, return the directory
         if home_fs.exists(download_dir) & (not recreate):
@@ -137,14 +140,14 @@ class deposit:
 
         # if dir is not there, make it 
         if not home_fs.exists(dir): 
-            home_fs.makedir(dir, recreate = recreate)
+            home_fs.makedirs(dir, exist_ok = recreate)
 
-        home_fs.makedir(download_dir, recreate = recreate)
+        home_fs.makedirs(download_dir, exist_ok = recreate)
 
         # download the files
         
         for file_key, file_url in dep_files.items():
-            file_path = fs.path.join(download_dir,file_key)
+            file_path = os.path.join(download_dir,file_key)
             r = requests.get(file_url)
             open(file_path, 'wb').write(r.content)
 
@@ -320,7 +323,7 @@ class deposit:
         return resp.content
     
     def check_zenodo_id(self, zenodo_id:str):
-        """Checks if Zenodo ID conforms to a pattern. Also allows a user to pass lastest or working as valid zenodo ids.
+        """Checks if Zenodo ID conforms to a pattern. Also allows a user to pass latest or working as valid zenodo ids.
 
         Parameters
         ----------
@@ -342,25 +345,32 @@ class deposit:
         
 
 
-# home_fs = OSFS(".")
-# download_dir = fs.path.join("hello","you")
+# home_fs = LocalFileSystem("./")
+# download_dir = os.path.join("hello","you")
 # home_fs.makedir(download_dir)
 
-# print(home_fs.listdir(path = "/"))
+# print(home_fs.listdir("./",False))
 
-# zenodo_dep = deposit()
-# zenodo_dep.set_working_version(zenodo_dep.latest_version)
-# # print(zenodo_dep.working_files)   
+
+zenodo_dep = deposit()
+zenodo_dep.set_working_version(zenodo_dep.latest_version)
+# print(zenodo_dep.working_files)   
 # zenodo_dep.download_versioned_data(recreate=False)
 # zenodo_dep.download_versioned_data(zenodo_id=15677843)
-# lates_virion  = zenodo_dep.load_remote_gzipped_csv("https://zenodo.org/api/records/15733485/files/virion.csv.gz/content")
-# print(len(lates_virion))
+# print(json.dumps(zenodo_dep.working_files,indent=4,))
 
-#print(versions_json["hits"]["hits"][1].keys())
+# latest_virion  = zenodo_dep.load_remote_csv_file("virion.csv.gz")
+# print(len(latest_virion))
 
-# virion = deposit()
-# json_ld = virion.export_metadata(format = "json-ld", zenodo_id = "latest")
+# latest_df = zenodo_dep.get_latest_dataframe()
+# print(len(latest_df))
+
+
+
+# json_ld = zenodo_dep.export_metadata(format = "json-ld", zenodo_id = "latest")
 # print(json_ld)
 
+citation = zenodo_dep.get_citation("apa")
+print(citation)
 # virion.set_working_version(zenodo_id="15733485")
 # print(virion.working_citation)

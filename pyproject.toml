@@ -9,7 +9,7 @@ description = 'Consistent and ergonomic methods for accessing versioned Virion d
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
-keywords = []
+keywords = ["virion","viral ecology","data package","virus host interactions"]
 authors = [
   { name = "collinschwantes", email = "collin@viralemergence.org" },
   {email = "collin.schwantes@yale.edu"},
@@ -26,11 +26,15 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Natural Language :: English",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research"
 ]
 dependencies = [
   "requests",
-  "fs",
-  "pandas",
+  "fsspec",
+  "pandas"
 ]
 
 [project.urls]
