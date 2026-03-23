@@ -352,8 +352,8 @@ class deposit:
 # print(home_fs.listdir("./",False))
 
 
-zenodo_dep = deposit()
-zenodo_dep.set_working_version(zenodo_dep.latest_version)
+# zenodo_dep = deposit()
+# zenodo_dep.set_working_version(zenodo_dep.latest_version)
 # print(zenodo_dep.working_files)   
 # zenodo_dep.download_versioned_data(recreate=False)
 # zenodo_dep.download_versioned_data(zenodo_id=15677843)
@@ -370,7 +370,7 @@ zenodo_dep.set_working_version(zenodo_dep.latest_version)
 # json_ld = zenodo_dep.export_metadata(format = "json-ld", zenodo_id = "latest")
 # print(json_ld)
 
-citation = zenodo_dep.get_citation("apa")
-print(citation)
+# citation = zenodo_dep.get_citation("apa")
+# print(citation)
 # virion.set_working_version(zenodo_id="15733485")
 # print(virion.working_citation)
