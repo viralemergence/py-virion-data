@@ -28,4 +28,9 @@ Therefore we use [hatch](https://hatch.pypa.io/1.16/) to build, test, and docume
 
 ### Testing
 
-Tests are stored in the "test" directory and test configurations can be found in the pyproject.toml file. 
+Tests are stored in the "tests" directory and test configurations can be found in the pyproject.toml file. 
+
+To run tests:
+```
+hatch run test:run
+```
