@@ -29,8 +29,18 @@ Therefore we use [hatch](https://hatch.pypa.io/1.16/) to build, test, and docume
 ### Versioning
 
 major - changes to defined classes that break previous releases 
-minor - changes or refactors to defined classes that add, refine or modify features without breaking functionality from previous releases. A minor release may also occur if there are significant improvements testing, documentation or other use support features. 
-patch - improvements to testing, documentation, or other user support features.  
+minor - changes or refactors to defined classes that add, refine or modify features without breaking functionality from previous releases. A minor release may also occur if there are significant improvements testing, documentation or other user support features. 
+patch - quick fixes to correct malfunctioning code, or improvements to testing, documentation, or other user support features.  
+
+To change the version run the following code:
+
+```
+hatch version minor
+```
+
+see [hatch versioning](https://hatch.pypa.io/1.9/version/) for more details.
+
+
 
 ### Testing
 
