@@ -71,6 +71,9 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+[tool.coverage.xml]
+directory = "*/coverage_xml_report"
+
 [tool.hatch.envs.test]
 description = """Run the test suite."""
 dependencies = [
@@ -82,4 +85,4 @@ dependencies = [
 ]
 
 [tool.hatch.envs.test.scripts]
-run = "pytest {args:--cov=py_virion_data --cov-report=term-missing}"
+run = "pytest {args:--cov=py_virion_data --cov-report=xml:coverage_xml_report/coverage.xml}"
