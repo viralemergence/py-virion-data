@@ -30,7 +30,7 @@ Therefore we use [hatch](https://hatch.pypa.io/1.16/) to build, test, and docume
 
 Tests are stored in the "tests" directory and test configurations can be found in the pyproject.toml file. See [Using Hatch for Developing](https://www.pyopensci.org/python-package-guide/tutorials/develop-python-package-hatch.html) for more info.
 
-To run tests:
+To run tests locally:
 ```
-hatch run test:run
+hatch run test:run_local
 ```
