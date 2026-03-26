@@ -26,6 +26,12 @@ This package was developed using the [PyOpenSci package tutorial](https://www.py
 
 Therefore we use [hatch](https://hatch.pypa.io/1.16/) to build, test, and document the package.
 
+### Versioning
+
+major - changes to defined classes that break previous releases 
+minor - changes or refactors to defined classes that add, refine or modify features without breaking functionality from previous releases. A minor release may also occur if there are significant improvements testing, documentation or other use support features. 
+patch - improvements to testing, documentation, or other user support features.  
+
 ### Testing
 
 Tests are stored in the "tests" directory and test configurations can be found in the pyproject.toml file. See [Using Hatch for Developing](https://www.pyopensci.org/python-package-guide/tutorials/develop-python-package-hatch.html) for more info.
