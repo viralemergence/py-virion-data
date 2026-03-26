@@ -2,7 +2,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/py-virion-data.svg)](https://pypi.org/project/py-virion-data)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-virion-data.svg)](https://pypi.org/project/py-virion-data)
-
+[![codecov](https://codecov.io/github/viralemergence/py-virion-data/graph/badge.svg?token=PNEFR3NP4T)](https://codecov.io/github/viralemergence/py-virion-data)
 -----
 
 ## Table of Contents
